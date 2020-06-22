@@ -38,3 +38,33 @@ http_archive(
     strip_prefix = "rules_cc-9e10b8a6db775b1ecd358d8ddd3dab379a2c29a5",
     sha256 = "954b7a3efc8752da957ae193a13b9133da227bdacf5ceb111f2e11264f7e8c95",
 )
+
+
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
+git_repository(
+  name = "fdsdk_toolchain_repo",
+  branch = "master",
+  remote = "https://gitlab.com/Celduin/buildstream-bazel/bazel-toolchains-fdsdk",
+)
+
+load("@fdsdk_toolchain_repo//toolchain:gen_build_defs.bzl", "gen_build_defs")
+
+http_archive(
+  name = "fdsdk_archive",
+  urls = [
+    "file:///bazel-toolchains/freedesktop-sdk-toolchain-x86_64-aarch64.tar.xz",
+  ],
+)
+
+
+gen_build_defs(
+  name = "fdsdk",
+  arch = "aarch64",
+  archive = "@fdsdk_archive",
+  parent_repo = "@fdsdk_toolchain_repo",
+  build_template_file = "@fdsdk_toolchain_repo//toolchain:BUILD.in",
+  wrapper_template_file = "@fdsdk_toolchain_repo//toolchain:wrapper.in",
+)
+
+register_toolchains("@fdsdk//:cc-toolchain")
